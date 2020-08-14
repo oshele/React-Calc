@@ -1,65 +1,100 @@
-import React from 'react';
+import React, { Component } from 'react';
+import Total from './Components/total/Total';
+import History from './Components/history/History';
+import Operation from './Components/operation/Operation';
 
 
-function App() {
-  return (
-    <React.Fragment >
-      <header >
-        <h1> Кошелек </h1>
-        <h2> Калькулятор расходов </h2>
-      </header>
-      <main >
-        <div className="container" >
-          <section className="total" >
-            <header className="total__header" >
-              < h3 > Баланс </h3>
-              <p className="total__balance" > 0₽ < /p> 
-                  </header>
-              <div className="total__main" >
-                <div className="total__main-item total__income" >
-                  <h4 > Доходы </h4>
-                  <p className="total__money total__money-income" >+0₽ </p>
-                </div>
-                <div className="total__main-item total__expenses" >
-                  <h4> Расходы < h4>
-                    <p className="total__money total__money-expenses" >-0₽ </p> 
-                    </div> 
-                  </div> 
-                </section>
-                <section className="history" >
-                  <h3 > История расходов < /h3>
-                  <ul className="history__list">
-                      <li className="history__item history__item-plus" > Получил зарплату
-                      <span className="history__money" > +30000₽ </span>
-                        < button className="history__delete" > x </button>
-                      </li>
-                      <li className="history__item  history__item-minus" > Отдал долг
-                      <span className="history__money" > -10000₽ </span>
-                        <button className="history__delete" > x </button>
-                      </li>
-                    </ul> 
-                </section>
 
-                  <section className="operation" >
-                    <h3 > Новая операция </h3>
-                    <form id="form" >
-                      <label>
-                        <input type="text" className="operation__fields operation__name" placeholder="Наименование операции" />
-                      </label>
-                      <label>
-                        < input type="number" className="operation__fields operation__amount" placeholder="Введите сумму" />
-                      </label>
-                      < div className="operation__btns" >
-                        <button type="submit" className="operation__btn operation__btn-subtract" > РАСХОД </button>
-                        <button type="submit" className="operation__btn operation__btn-add" > ДОХОД </button>
-                      </div>
+class App extends Component {
+  state = {
+    transactions: [],
+    description: '',
+    amount: '',
+    incomes: '',
+    expenses: '',
+    balance: '',
+  }
 
-                    </form>
-                  </section> 
-              </div> 
-          </main>  
-    </React.Fragment>
-  );
+  addTransaction = add => {
+    const transactions = [...this.state.transactions,
+    {
+      id: `cmr${(+new Date).toString(16)}`,
+      description: this.state.description,
+      amount: this.state.amount,
+      add
+    }
+    ];
+
+    const incomes = this.countIncome(transactions);
+    const expenses = this.countExpense(transactions);
+
+    this.setState({
+      transactions,
+      description: '',
+      amount: '',
+      incomes: incomes,
+      expenses: expenses,
+      balance: (incomes - expenses),
+    });
+
+
+  }
+
+  addAmoumt = e => {
+    this.setState({ amount: e.target.value });
+  }
+
+  addDescription = e => {
+    this.setState({ description: e.target.value });
+  }
+
+  countIncome = (transactions) => {
+    let incomes = 0;
+    transactions.filter(item => {
+      if (item.add) {
+        incomes += +item.amount;
+      };
+    });
+    return incomes;
+  }
+
+  countExpense = (transactions) => {
+    let expenses = 0;
+    transactions.filter(item => {
+      if (!item.add) {
+        expenses += +item.amount;
+      };
+    });
+    return expenses;
+  }
+
+  render() {
+    return (
+      <>
+        <header>
+          <h1> Кошелек </h1>
+          <h2> Калькулятор расходов </h2>
+        </header>
+        <main>
+          <div className="container">
+            <Total
+              incomes={this.state.incomes}
+              expenses={this.state.expenses}
+              balance={this.state.balance}
+            />
+            <History transactions={this.state.transactions} />
+            <Operation
+              addTransaction={this.addTransaction}
+              addAmoumt={this.addAmoumt}
+              addDescription={this.addDescription}
+              description={this.state.description}
+              amount={this.state.amount}
+            />
+          </div>
+        </main>
+      </>
+    );
+  }
 }
 
 export default App;
